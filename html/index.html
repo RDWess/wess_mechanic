@@ -3,246 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tablet Mecánico</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/tablet.css">
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Tablet de Mecánico - Pro System</title>
 </head>
 <body>
-    <!-- Pantalla principal -->
-    <div id="homeScreen" class="screen active">
-        <div class="status-bar">
-            <div class="time" id="currentTime">00:00</div>
-            <div class="battery">
-                <i class="fas fa-battery-full"></i>
-                <span>100%</span>
-            </div>
-        </div>
-        
-        <div class="welcome-section">
-            <h1 id="businessName">Mecánico</h1>
-            <p id="welcomeMessage">Bienvenido, <span id="playerName">Usuario</span></p>
-            <div class="stats">
-                <div class="stat">
-                    <i class="fas fa-receipt"></i>
-                    <span id="pendingInvoices">0</span>
-                </div>
-                <div class="stat">
-                    <i class="fas fa-users"></i>
-                    <span id="memberCount">0</span>
-                </div>
-                <div class="stat">
-                    <i class="fas fa-university"></i>
-                    <span id="bankBalance">$0</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="apps-grid" id="appsContainer">
-            <!-- Apps se cargan dinámicamente -->
-        </div>
-        
-        <div class="footer">
-            <button class="btn-logout" onclick="logout()">
-                <i class="fas fa-sign-out-alt"></i>
-            </button>
-        </div>
-    </div>
-    
-    <!-- Pantalla de facturas -->
-    <div id="invoicesScreen" class="screen">
-        <div class="screen-header">
-            <button class="btn-back" onclick="goBack()">
-                <i class="fas fa-arrow-left"></i>
-            </button>
-            <h2>Facturas Pendientes</h2>
-        </div>
-        
-        <div class="content" id="invoicesList">
-            <!-- Facturas se cargan dinámicamente -->
-        </div>
-    </div>
-    
-    <!-- Pantalla de miembros -->
-    <div id="membersScreen" class="screen">
-        <div class="screen-header">
-            <button class="btn-back" onclick="goBack()">
-                <i class="fas fa-arrow-left"></i>
-            </button>
-            <h2>Miembros</h2>
-        </div>
-        
-        <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('members', this)">Lista</button>
-            <button class="tab-btn" onclick="switchTab('top', this)">Top</button>
-            <button class="tab-btn" onclick="switchTab('chat', this)">Chat</button>
-        </div>
-        
-        <div class="tab-content active" id="membersTab">
-            <div class="members-list" id="membersList">
-                <!-- Miembros se cargan dinámicamente -->
-            </div>
+    <div id="tablet-wrapper" style="display: none;">
+        <div id="tablet-frame" class="bg-lock">
+   </div>
             
-            <div class="actions">
-                <button class="btn-primary" onclick="addMember()">
-                    <i class="fas fa-user-plus"></i> Añadir Miembro
-                </button>
-            </div>
-        </div>
-        
-        <div class="tab-content" id="topTab">
-            <div class="top-list" id="topList">
-                <!-- Top se carga dinámicamente -->
-            </div>
-        </div>
-        
-        <div class="tab-content" id="chatTab">
-            <div class="chat-messages" id="chatMessages">
-                <!-- Mensajes de chat -->
-            </div>
-            <div class="chat-input">
-                <input type="text" id="chatInput" placeholder="Escribe un mensaje...">
-                <button onclick="sendMessage()">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Pantalla de banco -->
-    <div id="bankScreen" class="screen">
-        <div class="screen-header">
-            <button class="btn-back" onclick="goBack()">
-                <i class="fas fa-arrow-left"></i>
-            </button>
-            <h2>Banco del Negocio</h2>
-        </div>
-        
-        <div class="bank-balance">
-            <h3>Saldo Actual</h3>
-            <div class="balance-amount" id="currentBalance">$0</div>
-        </div>
-        
-        <div class="bank-actions">
-            <div class="action">
-                <input type="number" id="depositAmount" placeholder="Monto a depositar">
-                <button class="btn-success" onclick="depositMoney()">
-                    <i class="fas fa-arrow-down"></i> Depositar
-                </button>
-            </div>
-            <div class="action">
-                <input type="number" id="withdrawAmount" placeholder="Monto a retirar">
-                <button class="btn-warning" onclick="withdrawMoney()">
-                    <i class="fas fa-arrow-up"></i> Retirar
-                </button>
-            </div>
-        </div>
-        
-        <div class="transactions">
-            <h3>Últimas Transacciones</h3>
-            <div class="transactions-list" id="transactionsList">
-                <!-- Transacciones se cargan dinámicamente -->
-            </div>
-        </div>
-    </div>
-    
-    <!-- Pantalla de pagos -->
-    <div id="paymentsScreen" class="screen">
-        <div class="screen-header">
-            <button class="btn-back" onclick="goBack()">
-                <i class="fas fa-arrow-left"></i>
-            </button>
-            <h2>Pagos Diarios</h2>
-        </div>
-        
-        <div class="payments-info">
-            <p><i class="fas fa-info-circle"></i> Los cambios se reinician al reiniciar el servidor</p>
-        </div>
-        
-        <div class="payments-list" id="paymentsList">
-            <!-- Pagos se cargan dinámicamente -->
-        </div>
-    </div>
-    
-    <!-- HUD de trabajo -->
-    <div id="workHUD" class="work-hud">
-        <div class="hud-header">
-            <h3><i class="fas fa-wrench"></i> Trabajo Activo</h3>
-            <button class="btn-close-hud" onclick="closeWorkHUD()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="hud-content">
-            <div class="hud-item">
-                <span class="label">Vehículo:</span>
-                <span class="value" id="hudVehicle">-</span>
-            </div>
-            <div class="hud-item">
-                <span class="label">Cliente:</span>
-                <span class="value" id="hudCustomer">-</span>
-            </div>
-            <div class="hud-item">
-                <span class="label">Monto:</span>
-                <span class="value" id="hudAmount">$0</span>
-            </div>
-            <div class="hud-item">
-                <span class="label">Personalización:</span>
-                <div class="customization-list" id="hudCustomization">
-                    <!-- Items de personalización -->
+            <section id="screen-lock" class="screen">
+                <div class="status-bar">
+                    <span id="lock-time">00:00</span>
                 </div>
-            </div>
-            <button class="btn-complete" onclick="completeWork()">
-                <i class="fas fa-check"></i> Completar Trabajo
-            </button>
-        </div>
-    </div>
-    
-    <!-- Modales -->
-    <div id="invoiceModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Detalles de Factura</h3>
-                <button class="btn-close" onclick="closeModal('invoiceModal')">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body" id="invoiceDetails">
-                <!-- Detalles de factura -->
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary" onclick="closeModal('invoiceModal')">Cancelar</button>
-                <button class="btn-primary" id="claimInvoiceBtn" onclick="claimInvoice()">Reclamar Factura</button>
-            </div>
-        </div>
-    </div>
-    
-    <div id="addMemberModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Añadir Miembro</h3>
-                <button class="btn-close" onclick="closeModal('addMemberModal')">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>Selecciona un jugador cercano para añadir al negocio</p>
-                <div class="form-group">
-                    <label for="memberRank">Rango:</label>
-                    <select id="memberRank">
-                        <option value="recruit">Recluta</option>
-                        <option value="employee">Empleado</option>
-                        <option value="manager">Gerente</option>
-                    </select>
+                <div class="lock-content" onclick="attemptUnlock()">
+                    <i class="fas fa-fingerprint"></i>
+                    <p>TOCA PARA DESBLOQUEAR</p>
+                    <span id="lock-date">Cargando fecha...</span>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary" onclick="closeModal('addMemberModal')">Cancelar</button>
-                <button class="btn-primary" onclick="confirmAddMember()">Añadir</button>
-            </div>
-        </div>
-    </div>
+            </section>
 
-    <script src="js/tablet.js"></script>
-    <script src="js/apps.js"></script>
+            <section id="screen-login" class="screen" style="display: none;">
+    <div class="login-container">
+        <div class="login-box">
+            <h2>BIENVENIDO</h2>
+            <p>Configura tu cuenta de mecánico</p>
+            
+            <div class="input-field">
+                <label>NOMBRE DE USUARIO</label>
+                <input type="text" id="input-user" placeholder="Ej: Juan_Perez">
+            </div>
+
+            <div class="input-field">
+                <label>CONTRASEÑA DE ACCESO</label>
+                <input type="password" id="input-pass" placeholder="••••••••">
+            </div>
+
+            <button id="btn-auth-action" onclick="processAuth()">CREAR CUENTA / ENTRAR</button>
+        </div>
+    </div>
+</section>
+
+            <section id="screen-home" class="screen" style="display: none;">
+                <div class="header-home">
+                    <div class="home-clock">
+                        <span id="home-time">00:00</span>
+                        <span id="home-date">01/01/2024</span>
+                    </div>
+                </div>
+
+                <div class="apps-grid">
+                    <div class="app-item" onclick="triggerApp('repair')">
+                        <div class="app-icon icon-repair"><i class="fas fa-tools"></i></div>
+                        <span>Reparar</span>
+                    </div>
+                    <div class="app-item" onclick="openSubApp('estetica')">
+                        <div class="app-icon icon-visual"><i class="fas fa-paint-roller"></i></div>
+                        <span>Estética</span>
+                    </div>
+                    <div class="app-item" onclick="openSubApp('tuning')">
+                        <div class="app-icon icon-engine"><i class="fas fa-tachometer-alt"></i></div>
+                        <span>Tuning</span>
+                    </div>
+                    <div class="app-item" onclick="openSubApp('ajustes')">
+                        <div class="app-icon icon-stance"><i class="fas fa-car-side"></i></div>
+                        <span>Ajustes</span>
+                    </div>
+                    <div class="app-item" onclick="openSubApp('facturas')">
+                        <div class="app-icon icon-bills"><i class="fas fa-file-invoice-dollar"></i></div>
+                        <span>Facturas</span>
+                    </div>
+                    <div class="app-item" onclick="openSubApp('miembros')">
+                        <div class="app-icon icon-team"><i class="fas fa-users-cog"></i></div>
+                        <span>Miembros</span>
+                    </div>
+                </div>
+            </section>
+
+            <nav id="bottom-bar">
+                <div class="nav-btn" onclick="goBack()"><i class="fas fa-chevron-left"></i></div>
+                <div class="nav-btn" onclick="goHome()"><i class="fas fa-home"></i></div>
+                <div class="nav-btn" onclick="openCamera()"><i class="fas fa-camera"></i></div>
+            </nav>
+
+        </div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>

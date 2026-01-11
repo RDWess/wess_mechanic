@@ -7,6 +7,14 @@ local safeZones = {}
 local currentInvoiceHUD = nil
 local inSafeZone = false
 
+-- Este es el "túnel" que conecta tu HTML con el juego para cerrar
+RegisterNUICallback('close', function(data, cb)
+    SetNuiFocus(false, false) -- Quita el ratón
+    isTabletOpen = false      -- Marca la tablet como cerrada
+    ClearPedTasks(PlayerPedId()) -- Quita la animación
+    cb('ok')
+end)
+
 -- Inicialización
 Citizen.CreateThread(function()
     while not NetworkIsPlayerActive(PlayerId()) do
@@ -256,6 +264,11 @@ end
 -- Abrir tablet de mecánico
 function OpenMechanicTablet()
     if isTabletOpen then return end
+    SetNuiFocus(true, true) -- Esto activa el ratón y el teclado para la tablet
+    SendNUIMessage({
+    type = "openTablet",
+    hasAccount = true -- Aquí pondremos la lógica de la base de datos después
+})
     
     -- Verificar si es mecánico
     if not currentBusiness then
@@ -266,21 +279,23 @@ function OpenMechanicTablet()
     -- Cargar datos
     TriggerServerEvent('mechanic:getBusinessInfo')
     
-    -- Abrir interfaz
+    -- Abrir tablet de mecánico (LIMPIO PARA TU FIGMA)
+function OpenMechanicTablet()
+    if isTabletOpen then return end
+    
+    -- 1. Activamos el ratón y el foco
     SetNuiFocus(true, true)
+    
+    -- 2. Mandamos el mensaje EXACTO que espera tu script.js
     SendNUIMessage({
-        action = 'openTablet',
-        business = currentBusiness,
-        apps = GetTabletApps()
+        type = "openTablet", -- Usamos 'type' porque así lo pusimos en el JS de Figma
+        hasAccount = true    -- Esto saltará la pantalla de login si ya tiene cuenta
     })
     
     isTabletOpen = true
-    PlaySoundFrontend(-1, Config.Sounds.open_tablet, "HUD_FRONTEND_DEFAULT_SOUNDSET", true)
     
-    -- Mostrar HUD si hay factura reclamada
-    if currentInvoiceHUD then
-        ShowWorkHUD(currentInvoiceHUD)
-    end
+    -- Opcional: Animación de sacar la tablet
+    TaskStartScenarioInPlace(PlayerPedId(), "WORLD_HUMAN_TOURIST_MAP", 0, false)
 end
 
 -- Cerrar tablet
@@ -288,10 +303,14 @@ function CloseMechanicTablet()
     if not isTabletOpen then return end
     
     SetNuiFocus(false, false)
-    SendNUIMessage({action = 'closeTablet'})
+    
+    -- Mandamos cerrar al HTML
+    SendNUIMessage({
+        type = "closeTablet" 
+    })
     
     isTabletOpen = false
-    PlaySoundFrontend(-1, Config.Sounds.close_tablet, "HUD_FRONTEND_DEFAULT_SOUNDSET", true)
+    ClearPedTasks(PlayerPedId()) -- Detiene la animación
 end
 
 -- Obtener aplicaciones de la tablet

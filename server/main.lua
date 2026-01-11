@@ -33,6 +33,97 @@ AddEventHandler('mechanic:createBusiness', function(businessName, bossIdentifier
     end
 end)
 
+-- Evento para registrar una nueva factura desde la Tablet
+RegisterNetEvent('mechanic:createInvoice', function(data)
+    local src = source
+    local business = Business.GetPlayerBusiness(src) -- Obtenemos el negocio automáticamente
+    
+    if not business then return end
+
+    MySQL.Async.insert('INSERT INTO mechanic_invoices (business_id, customer_name, vehicle_model, amount, status, created_at) VALUES (?, ?, ?, ?, ?, NOW())', {
+        business.id,     
+        data.clientName, 
+        data.vehicle,    
+        data.amount,     
+        'pending'        
+    }, function(id)
+        if id then
+            TriggerClientEvent('ox_lib:notify', src, {title = 'FACTURACIÓN', description = 'Factura #'..id..' enviada', type = 'success'})
+        end
+    end)
+end)
+    
+    -- Insertamos en la tabla mechanic_invoices que creaste
+    MySQL.Async.insert('INSERT INTO mechanic_invoices (business_id, customer_name, vehicle_model, amount, status, created_at) VALUES (?, ?, ?, ?, ?, NOW())', {
+        data.businessId, -- El ID del taller
+        data.clientName, -- El nombre que el mecánico escribió en el "Marco" de Figma
+        data.vehicle,    -- El modelo del coche
+        data.amount,     -- El precio que puso el mecánico
+        'pending'        -- Estado inicial
+    }, function(id)
+        if id then
+            TriggerClientEvent('ox_lib:notify', src, {title = 'FACTURACIÓN', description = 'Factura #'..id..' enviada correctamente', type = 'success'})
+        end
+    end)
+end)
+
+-- Callback para el Login de tu diseño de Figma
+lib.callback.register('mechanic:tabletLogin', function(source, data)
+    local xPlayer = exports.qbx_core:GetPlayer(source)
+    local identifier = xPlayer.PlayerData.citizenid
+
+    -- Buscamos si existe la cuenta en la tabla que añadimos al SQL
+    local result = MySQL.Sync.fetchAll('SELECT * FROM mechanic_tablet_accounts WHERE identifier = @id AND username = @user AND password = @pass', {
+        ['@id'] = identifier,
+        ['@user'] = data.usuario,
+        ['@pass'] = data.clave
+    })
+
+    if result[1] then
+        return { success = true, name = result[1].username }
+    else
+        return { success = false, message = "Usuario o contraseña incorrectos" }
+    end
+end)
+
+-- Registro de nueva cuenta desde la Tablet
+RegisterNetEvent('mechanic:registerTabletAccount', function(data)
+    local src = source
+    local xPlayer = exports.qbx_core:GetPlayer(src)
+    local identifier = xPlayer.PlayerData.citizenid
+
+    -- Verificamos si ya es miembro del negocio antes de dejarlo crear cuenta
+    local isMember = MySQL.Sync.fetchScalar('SELECT 1 FROM mechanic_members WHERE member_identifier = ?', {identifier})
+    
+    if isMember then
+        MySQL.Async.execute('INSERT INTO mechanic_tablet_accounts (identifier, username, password) VALUES (?, ?, ?)', {
+            identifier, data.usuario, data.clave
+        }, function(affectedRows)
+            if affectedRows > 0 then
+                TriggerClientEvent('ox_lib:notify', src, {title = 'TABLET', description = 'Cuenta de acceso creada', type = 'success'})
+            end
+        end)
+    else
+        TriggerClientEvent('ox_lib:notify', src, {title = 'ERROR', description = 'No eres empleado de este taller', type = 'error'})
+    end
+end)
+
+RegisterNetEvent('mechanic:payRepair', function(businessId, cost)
+    local src = source
+    local xPlayer = exports.qbx_core:GetPlayer(src)
+    local citizenid = xPlayer.PlayerData.citizenid
+
+    -- 1. Quitamos dinero al mecánico o al taller por los materiales
+    -- 2. Registramos el movimiento en tu tabla de transacciones
+    MySQL.Async.execute('INSERT INTO mechanic_transactions (business_id, member_identifier, transaction_type, amount, description) VALUES (?, ?, ?, ?, ?)', {
+        businessId,
+        citizenid,
+        'withdraw',
+        cost,
+        'Gasto en materiales de reparación'
+    })
+end)
+
 -- Añadir punto de trabajo
 RegisterNetEvent('mechanic:addWorkPoint')
 AddEventHandler('mechanic:addWorkPoint', function(pointType, coords)

@@ -33,15 +33,13 @@ server_scripts {
     'server/main.lua'
 }
 
-ui_page 'html/index.html'
+ui_page 'html/index.html' -- Asegúrate de que apunte a TU archivo
 
 files {
     'html/index.html',
-    'html/css/*.css',
-    'html/js/*.js',
-    'html/assets/*.png',
-    'html/assets/*.jpg',
-    'locales/*.lua'
+    'html/style.css',
+    'html/script.js',
+    'html/img/*.png' 
 }
 
 escrow_ignore {
